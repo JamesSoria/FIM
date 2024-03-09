@@ -1,7 +1,8 @@
-﻿Function Calculate-File-Hash($filepath) {
+Function Calculate-File-Hash($filepath) {
     $filehash = Get-FileHash -Path $filepath -Algorithm SHA512
     return $filehash
 }
+
 Function Erase-Baseline-If-Already-Exists() {
     $baselineExists = Test-Path -Path .\baseline.txt
 
@@ -10,7 +11,6 @@ Function Erase-Baseline-If-Already-Exists() {
         Remove-Item -Path .\baseline.txt
     }
 }
-
 
 Write-Host ""
 Write-Host "How can I help you?"
@@ -85,14 +85,21 @@ elseif ($response -eq "B".ToUpper()) {
             }
         }
     }
-    
-    #email the user alerts 
-    foreach ($key in $fileHashDictionary.Keys) {
-        $baselineFileStillExists = Test-Path -Path $key
-        if (-Not $baselineFileStillExists) {
-            # One of the baseline files must have been deleted, notify the user
-            Write-Host "$($key) has been deleted!" -ForegroundColor DarkRed -BackgroundColor Gray
-            Send-EmailNotification -Subject "File deleted: $($key)" -Body "The file $($key) has been deleted!"
-        }
-    }
 }
+
+# Function to send email notification
+Function Send-EmailNotification {
+    param(
+        [string]$Subject,
+        [string]$Body
+    )
+    $EmailParams = @{
+        From       = "your_email@example.com"
+        To         = "recipient_email@example.com"
+        Subject    = $Subject
+        Body       = $Body
+        SmtpServer = "smtp.example.com"
+    }
+    Send-MailMessage @EmailParams
+}
+
